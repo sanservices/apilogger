@@ -1,4 +1,4 @@
-name: "pre-release"
+name: Draft pre-release
 
 on:
   push:
