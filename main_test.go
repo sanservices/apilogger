@@ -7,13 +7,6 @@ import (
 	"testing"
 )
 
-// import (
-// 	"context"
-// 	"net/http"
-// 	"strings"
-// 	"testing"
-// )
-
 func TestNew(t *testing.T) {
 	apiKey := "r12d3f4"
 	requestID := "1234"
