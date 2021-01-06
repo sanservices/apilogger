@@ -28,6 +28,11 @@ const (
 	// Depth of the callstack - needed to determine
 	// the initial caller function, for example
 	depth int = 5
+
+	prefixInfo  = "INFO "
+	prefixWarn  = "WARN "
+	prefixError = "ERROR "
+	prefixFatal = "FATAL "
 )
 
 // Logger struct
@@ -64,24 +69,12 @@ func New(ctx context.Context, outPath string) *Logger {
 		errOutput = io.MultiWriter(file, errOutput)
 	}
 
-	id, ok := ctx.Value(RequestIDKey).(string)
-	if !ok {
-		id = ""
-	}
-
-	apiKey, ok := ctx.Value(APIKEY).(string)
-	if !ok {
-		apiKey = ""
-	}
-
-	addr, ok := ctx.Value(RemoteAddrKey).(string)
-	if !ok {
-		addr = ""
-	}
-
-	session, ok := ctx.Value(SessionIDKey).(string)
-	if !ok {
-		addr = ""
+	var id, apiKey, addr, session string
+	if ctx != nil {
+		id, _ = ctx.Value(RequestIDKey).(string)
+		apiKey, _ = ctx.Value(APIKEY).(string)
+		addr, _ = ctx.Value(RemoteAddrKey).(string)
+		session, _ = ctx.Value(SessionIDKey).(string)
 	}
 
 	return &Logger{
@@ -112,7 +105,7 @@ func (l *Logger) printlnf(logger *log.Logger, logCat LogCat, format string, v ..
 
 func (l *Logger) Info(logCat LogCat, v ...interface{}) {
 	if l.infoLog == nil {
-		l.infoLog = log.New(l.output, "INFO ", log.Ldate|log.Ltime)
+		l.infoLog = log.New(l.output, prefixInfo, log.Ldate|log.Ltime)
 	}
 
 	l.println(l.infoLog, logCat, v...)
@@ -121,7 +114,7 @@ func (l *Logger) Info(logCat LogCat, v ...interface{}) {
 // Infof prints a message using the specified format.
 func (l *Logger) Infof(logCat LogCat, format string, v ...interface{}) {
 	if l.infoLog == nil {
-		l.infoLog = log.New(l.output, "INFO ", log.Ldate|log.Ltime)
+		l.infoLog = log.New(l.output, prefixInfo, log.Ldate|log.Ltime)
 	}
 
 	l.printlnf(l.infoLog, logCat, format, v...)
@@ -130,7 +123,7 @@ func (l *Logger) Infof(logCat LogCat, format string, v ...interface{}) {
 // InfoWF prints message using Fields struct to pass multiple key=value pairs.
 func (l *Logger) InfoWF(logCat LogCat, fields *Fields) {
 	if l.infoLog == nil {
-		l.infoLog = log.New(l.output, "INFO ", log.Ldate|log.Ltime)
+		l.infoLog = log.New(l.output, prefixInfo, log.Ldate|log.Ltime)
 	}
 
 	l.printlnWF(l.infoLog, logCat, fields)
@@ -138,7 +131,7 @@ func (l *Logger) InfoWF(logCat LogCat, fields *Fields) {
 
 func (l *Logger) Warn(logCat LogCat, v ...interface{}) {
 	if l.warningLog == nil {
-		l.warningLog = log.New(l.output, "WARNING ", log.Ldate|log.Ltime)
+		l.warningLog = log.New(l.output, prefixWarn, log.Ldate|log.Ltime)
 	}
 
 	l.println(l.warningLog, logCat, v...)
@@ -146,7 +139,7 @@ func (l *Logger) Warn(logCat LogCat, v ...interface{}) {
 
 func (l *Logger) Warnf(logCat LogCat, format string, v ...interface{}) {
 	if l.warningLog == nil {
-		l.warningLog = log.New(l.output, "WARNING ", log.Ldate|log.Ltime)
+		l.warningLog = log.New(l.output, prefixWarn, log.Ldate|log.Ltime)
 	}
 
 	l.printlnf(l.warningLog, logCat, format, v...)
@@ -155,7 +148,7 @@ func (l *Logger) Warnf(logCat LogCat, format string, v ...interface{}) {
 // WarnWF prints message with fields to use multiple key=value pairs.
 func (l *Logger) WarnWF(logCat LogCat, fields *Fields) {
 	if l.warningLog == nil {
-		l.warningLog = log.New(l.output, "WARNING ", log.Ldate|log.Ltime)
+		l.warningLog = log.New(l.output, prefixWarn, log.Ldate|log.Ltime)
 	}
 	l.printlnWF(l.warningLog, logCat, fields)
 }
@@ -163,7 +156,7 @@ func (l *Logger) WarnWF(logCat LogCat, fields *Fields) {
 // Error prints message at error level.
 func (l *Logger) Error(logCat LogCat, v ...interface{}) {
 	if l.errorLog == nil {
-		l.errorLog = log.New(l.errOutput, "ERROR ", log.Ldate|log.Ltime)
+		l.errorLog = log.New(l.errOutput, prefixError, log.Ldate|log.Ltime)
 	}
 
 	l.println(l.errorLog, logCat, v...)
@@ -172,7 +165,7 @@ func (l *Logger) Error(logCat LogCat, v ...interface{}) {
 // Errorf prints message at error level.
 func (l *Logger) Errorf(logCat LogCat, format string, v ...interface{}) {
 	if l.errorLog == nil {
-		l.errorLog = log.New(l.errOutput, "ERROR ", log.Ldate|log.Ltime)
+		l.errorLog = log.New(l.errOutput, prefixError, log.Ldate|log.Ltime)
 	}
 
 	l.printlnf(l.errorLog, logCat, format, v...)
@@ -181,7 +174,7 @@ func (l *Logger) Errorf(logCat LogCat, format string, v ...interface{}) {
 // ErrorWF prints message at error level using Fields with multiple key=value pairs.
 func (l *Logger) ErrorWF(logCat LogCat, fields *Fields) {
 	if l.errorLog == nil {
-		l.errorLog = log.New(l.errOutput, "ERROR ", log.Ldate|log.Ltime)
+		l.errorLog = log.New(l.errOutput, prefixError, log.Ldate|log.Ltime)
 	}
 
 	l.printlnWF(l.errorLog, logCat, fields)
@@ -193,7 +186,7 @@ func (l *Logger) Fatal(logCat LogCat, v ...interface{}) {
 		l.errorLog = log.New(l.errOutput, "", log.Ldate|log.Ltime)
 	}
 
-	l.errorLog.SetPrefix("FATAL ")
+	l.errorLog.SetPrefix(prefixFatal)
 	l.errorLog.Fatal(finalMessage(l, logCat, v...))
 }
 
@@ -203,7 +196,7 @@ func (l *Logger) Fatalf(logCat LogCat, format string, v ...interface{}) {
 		l.errorLog = log.New(l.errOutput, "", log.Ldate|log.Ltime)
 	}
 
-	l.errorLog.SetPrefix("FATAL ")
+	l.errorLog.SetPrefix(prefixFatal)
 	l.errorLog.Fatal(finalMessagef(l, logCat, format, v...))
 }
 
@@ -213,6 +206,6 @@ func (l *Logger) FatalWF(logCat LogCat, fields *Fields) {
 		l.errorLog = log.New(l.errOutput, "", log.Ldate|log.Ltime)
 	}
 
-	l.errorLog.SetPrefix("FATAL ")
+	l.errorLog.SetPrefix(prefixFatal)
 	l.errorLog.Fatal(finalMessageWF(l, logCat, fields))
 }
