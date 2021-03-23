@@ -139,6 +139,10 @@ func (l *Logger) InfoWF(ctx context.Context, logCat LogCat, fields *Fields) {
 	l.printlnWF(l.infoLog, logCat, startTime, fields)
 }
 
+func (l *Logger) Printf(s string, i ...interface{}) {
+	l.Infof(context.TODO(), LogCatDebug, s, i...)
+}
+
 func (l *Logger) Warn(ctx context.Context, logCat LogCat, v ...interface{}) {
 	if l.warningLog == nil {
 		l.warningLog = log.New(l.output, prefixWarn, log.Ldate|log.Ltime)
