@@ -54,6 +54,8 @@ type Logger struct {
 
 type Fields map[string]interface{}
 
+var defaultLogger *Logger
+
 // New returns a new Logger instance.
 func New(ctx context.Context, outPath string) *Logger {
 	var output io.Writer = os.Stdout
@@ -79,7 +81,7 @@ func New(ctx context.Context, outPath string) *Logger {
 	addr, _ = ctx.Value(RemoteAddrKey).(string)
 	session, _ = ctx.Value(SessionIDKey).(string)
 
-	return &Logger{
+	defaultLogger = &Logger{
 		requestID:  id,
 		apiKey:     apiKey,
 		remoteAddr: formatIPAddr(addr),
@@ -87,6 +89,8 @@ func New(ctx context.Context, outPath string) *Logger {
 		output:     output,
 		errOutput:  errOutput,
 	}
+
+	return defaultLogger
 }
 
 // prints message.
@@ -113,7 +117,6 @@ func (l *Logger) Info(ctx context.Context, logCat LogCat, v ...interface{}) {
 	l.println(l.infoLog, logCat, startTime, v...)
 }
 
-// Infof prints a message using the specified format.
 func (l *Logger) Infof(ctx context.Context, logCat LogCat, format string, v ...interface{}) {
 	if l.infoLog == nil {
 		l.infoLog = log.New(l.output, prefixInfo, log.Ldate|log.Ltime)
@@ -125,7 +128,6 @@ func (l *Logger) Infof(ctx context.Context, logCat LogCat, format string, v ...i
 	l.printlnf(l.infoLog, logCat, startTime, format, v...)
 }
 
-// InfoWF prints message using Fields struct to pass multiple key=value pairs.
 func (l *Logger) InfoWF(ctx context.Context, logCat LogCat, fields *Fields) {
 	if l.infoLog == nil {
 		l.infoLog = log.New(l.output, prefixInfo, log.Ldate|log.Ltime)
@@ -159,7 +161,6 @@ func (l *Logger) Warnf(ctx context.Context, logCat LogCat, format string, v ...i
 	l.printlnf(l.warningLog, logCat, startTime, format, v...)
 }
 
-// WarnWF prints message with fields to use multiple key=value pairs.
 func (l *Logger) WarnWF(ctx context.Context, logCat LogCat, fields *Fields) {
 	if l.warningLog == nil {
 		l.warningLog = log.New(l.output, prefixWarn, log.Ldate|log.Ltime)
@@ -171,7 +172,6 @@ func (l *Logger) WarnWF(ctx context.Context, logCat LogCat, fields *Fields) {
 	l.printlnWF(l.warningLog, logCat, startTime, fields)
 }
 
-// Error prints message at error level.
 func (l *Logger) Error(ctx context.Context, logCat LogCat, v ...interface{}) {
 	if l.errorLog == nil {
 		l.errorLog = log.New(l.errOutput, prefixError, log.Ldate|log.Ltime)
@@ -183,7 +183,6 @@ func (l *Logger) Error(ctx context.Context, logCat LogCat, v ...interface{}) {
 	l.println(l.errorLog, logCat, startTime, v...)
 }
 
-// Errorf prints message at error level.
 func (l *Logger) Errorf(ctx context.Context, logCat LogCat, format string, v ...interface{}) {
 	if l.errorLog == nil {
 		l.errorLog = log.New(l.errOutput, prefixError, log.Ldate|log.Ltime)
@@ -195,7 +194,6 @@ func (l *Logger) Errorf(ctx context.Context, logCat LogCat, format string, v ...
 	l.printlnf(l.errorLog, logCat, startTime, format, v...)
 }
 
-// ErrorWF prints message at error level using Fields with multiple key=value pairs.
 func (l *Logger) ErrorWF(ctx context.Context, logCat LogCat, fields *Fields) {
 	if l.errorLog == nil {
 		l.errorLog = log.New(l.errOutput, prefixError, log.Ldate|log.Ltime)
@@ -207,7 +205,6 @@ func (l *Logger) ErrorWF(ctx context.Context, logCat LogCat, fields *Fields) {
 	l.printlnWF(l.errorLog, logCat, startTime, fields)
 }
 
-// Fatal prints and calls os.exit(1).
 func (l *Logger) Fatal(ctx context.Context, logCat LogCat, v ...interface{}) {
 	if l.errorLog == nil {
 		l.errorLog = log.New(l.errOutput, "", log.Ldate|log.Ltime)
@@ -220,7 +217,6 @@ func (l *Logger) Fatal(ctx context.Context, logCat LogCat, v ...interface{}) {
 	l.errorLog.Fatal(finalMessage(l, logCat, startTime, v...))
 }
 
-// Fatalf prints and calls os.exit(1).
 func (l *Logger) Fatalf(ctx context.Context, logCat LogCat, format string, v ...interface{}) {
 	if l.errorLog == nil {
 		l.errorLog = log.New(l.errOutput, "", log.Ldate|log.Ltime)
@@ -233,7 +229,6 @@ func (l *Logger) Fatalf(ctx context.Context, logCat LogCat, format string, v ...
 	l.errorLog.Fatal(finalMessagef(l, logCat, startTime, format, v...))
 }
 
-// FatalWF prints and calls os.exit(1) with multiple key=value pairs.
 func (l *Logger) FatalWF(ctx context.Context, logCat LogCat, fields *Fields) {
 	if l.errorLog == nil {
 		l.errorLog = log.New(l.errOutput, "", log.Ldate|log.Ltime)
@@ -244,4 +239,64 @@ func (l *Logger) FatalWF(ctx context.Context, logCat LogCat, fields *Fields) {
 
 	l.errorLog.SetPrefix(prefixFatal)
 	l.errorLog.Fatal(finalMessageWF(l, logCat, startTime, fields))
+}
+
+// Info prints message with logging level of info
+func Info(ctx context.Context, logCat LogCat, v ...interface{}) {
+	defaultLogger.Info(ctx, logCat, v...)
+}
+
+// Infof prints a message using the specified format.
+func Infof(ctx context.Context, logCat LogCat, format string, v ...interface{}) {
+	defaultLogger.Infof(ctx, logCat, format, v...)
+}
+
+// InfoWF prints message using Fields struct to pass multiple key=value pairs.
+func InfoWF(ctx context.Context, logCat LogCat, fields *Fields) {
+	defaultLogger.InfoWF(ctx, logCat, fields)
+}
+
+// Warn prints message with logging level of info
+func Warn(ctx context.Context, logCat LogCat, v ...interface{}) {
+	defaultLogger.Warn(ctx, logCat, v...)
+}
+
+// Warnf prints a message using the specified format.
+func Warnf(ctx context.Context, logCat LogCat, format string, v ...interface{}) {
+	defaultLogger.Warnf(ctx, logCat, format, v...)
+}
+
+// WarnWF prints message with fields to use multiple key=value pairs.
+func WarnWF(ctx context.Context, logCat LogCat, fields *Fields) {
+	defaultLogger.WarnWF(ctx, logCat, fields)
+}
+
+// Error prints message at error level.
+func Error(ctx context.Context, logCat LogCat, v ...interface{}) {
+	defaultLogger.Error(ctx, logCat, v...)
+}
+
+// Errorf prints message at error level.
+func Errorf(ctx context.Context, logCat LogCat, format string, v ...interface{}) {
+	defaultLogger.Errorf(ctx, logCat, format, v...)
+}
+
+// ErrorWF prints message at error level using Fields with multiple key=value pairs.
+func ErrorWF(ctx context.Context, logCat LogCat, fields *Fields) {
+	defaultLogger.ErrorWF(ctx, logCat, fields)
+}
+
+// Fatal prints and calls os.exit(1).
+func Fatal(ctx context.Context, logCat LogCat, v ...interface{}) {
+	defaultLogger.Fatal(ctx, logCat, v...)
+}
+
+// Fatalf prints and calls os.exit(1).
+func Fatalf(ctx context.Context, logCat LogCat, format string, v ...interface{}) {
+	defaultLogger.Fatalf(ctx, logCat, format, v...)
+}
+
+// FatalWF prints and calls os.exit(1) with multiple key=value pairs.
+func FatalWF(ctx context.Context, logCat LogCat, fields *Fields) {
+	defaultLogger.FatalWF(ctx, logCat, fields)
 }
