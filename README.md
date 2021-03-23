@@ -6,7 +6,6 @@ Run `go get github.com/san-services/apilogger`
 
 # Usage
 
-
 ```go
 ctx := context.Background()
 
