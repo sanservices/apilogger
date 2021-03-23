@@ -6,6 +6,11 @@ Simple api logger for golang with the purpose of log basic information like api-
 
 Run `go get github.com/san-services/apilogger/v2`
 
+# Changes
+
+1. Added context as first argument to log functions. (thus we can pass some additional values to log, as now is implemented for execution time tracking)
+2. Made logger global
+
 # Usage
 
 ```go
@@ -36,7 +41,7 @@ func main() {
 
 	l.Infof(ctx, apilogger.LogCatDebug, "This is an info message with %s", "some variable")
 	l.Warnf(ctx, apilogger.LogCatDebug, "This is a warning message with format, some number: %d", 100)
-	l.Errorf(ctx, apilogger.LogCatDebug, "This is an error message with format, %v", errors.New("An error"))
+	l.Errorf(ctx, apilogger.LogCatDebug, "This is an error message with format, %v", errors.New("an error"))
 
 	l.InfoWF(ctx, apilogger.LogCatDebug, &apilogger.Fields{"message": "my message"})
 	l.WarnWF(ctx, apilogger.LogCatDebug, &apilogger.Fields{"warning": "my warning", "other": "another message"})
@@ -89,7 +94,7 @@ func main() {
 
     apilogger.Infof(ctx, apilogger.LogCatDebug, "This is an info message with %s", "some variable")
     apilogger.Warnf(ctx, apilogger.LogCatDebug, "This is a warning message with format, some number: %d", 100)
-    apilogger.Errorf(ctx, apilogger.LogCatDebug, "This is an error message with format, %v", errors.New("An error"))
+    apilogger.Errorf(ctx, apilogger.LogCatDebug, "This is an error message with format, %v", errors.New("an error"))
 
     apilogger.InfoWF(ctx, apilogger.LogCatDebug, &apilogger.Fields{"message": "my message"})
     apilogger.WarnWF(ctx, apilogger.LogCatDebug, &apilogger.Fields{"warning": "my warning", "other": "another message"})
