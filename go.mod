@@ -1,3 +1,3 @@
-module github.com/san-services/apilogger
+module github.com/sanservices/apilogger
 
 go 1.14
