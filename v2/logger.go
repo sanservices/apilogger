@@ -57,22 +57,9 @@ type Fields map[string]interface{}
 var defaultLogger *Logger
 
 // New returns a new Logger instance.
-func New(ctx context.Context, outPath string) *Logger {
+func New(ctx context.Context) *Logger {
 	var output io.Writer = os.Stdout
 	var errOutput io.Writer = os.Stderr
-
-	if len(outPath) != 0 {
-		file, err := os.OpenFile(
-			outPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-
-		if err != nil {
-			log.Println("Failed to open log file", err)
-			return nil
-		}
-
-		output = io.MultiWriter(file, output)
-		errOutput = io.MultiWriter(file, errOutput)
-	}
 
 	var id, apiKey, addr, session string
 
@@ -91,6 +78,21 @@ func New(ctx context.Context, outPath string) *Logger {
 	}
 
 	return defaultLogger
+}
+
+// Set logger to file
+func (l *Logger) SetOutputFile(outPath string) error {
+	file, err := os.OpenFile(
+		outPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+
+	if err != nil {
+		log.Println("Failed to open log file", err)
+		return err
+	}
+
+	l.output = io.MultiWriter(file, l.output)
+	l.errOutput = io.MultiWriter(file, l.errOutput)
+	return nil
 }
 
 // prints message.
