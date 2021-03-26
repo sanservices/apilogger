@@ -29,7 +29,7 @@ func TestNew(t *testing.T) {
 	rq = rq.WithContext(context.WithValue(
 		rq.Context(), SessionIDKey, session))
 
-	logger := New(rq.Context(), "")
+	logger := New(rq.Context())
 
 	assertEquals(t, logger.apiKey, apiKey)
 	assertEquals(t, logger.remoteAddr, ip)
@@ -64,7 +64,7 @@ func TestBaseMessage(t *testing.T) {
 		t.Error(err)
 	}
 
-	logger := New(rq.Context(), "")
+	logger := New(rq.Context())
 	logCat := LogCatStartUp
 
 	// mimics call stack depth
@@ -86,7 +86,7 @@ func TestFinalMessage(t *testing.T) {
 		t.Error(err)
 	}
 
-	logger := New(rq.Context(), "")
+	logger := New(rq.Context())
 	logCat := LogCatStartUp
 	output := finalMessage(logger, logCat, time.Now(), "hello test")
 
@@ -101,7 +101,7 @@ func TestFinalMessagef(t *testing.T) {
 		t.Error(err)
 	}
 
-	logger := New(rq.Context(), "")
+	logger := New(rq.Context())
 	logCat := LogCatStartUp
 	output := finalMessagef(logger, logCat, time.Now(), "%s", "hello test")
 
@@ -116,7 +116,7 @@ func TestFinalMessageWF(t *testing.T) {
 		t.Error(err)
 	}
 
-	logger := New(rq.Context(), "")
+	logger := New(rq.Context())
 	logCat := LogCatStartUp
 	output := finalMessageWF(logger, logCat, time.Now(), &Fields{"message": "hello test"})
 

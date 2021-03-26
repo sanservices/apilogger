@@ -33,7 +33,7 @@ func main() {
 	ctx = context.WithValue(ctx, apilogger.SessionIDKey, "sessionIdKey1")
 	ctx = context.WithValue(ctx, apilogger.StartTime, time.Now())
 
-	l := apilogger.New(ctx, "")
+	l := apilogger.New(ctx)
 
 	l.Info(ctx, apilogger.LogCatDebug, "This is an info message")
 	l.Warn(ctx, apilogger.LogCatDebug, "This is a warning message")
@@ -86,7 +86,7 @@ func main() {
     ctx = context.WithValue(ctx, apilogger.SessionIDKey, "sessionIdKey1")
     ctx = context.WithValue(ctx, apilogger.StartTime, time.Now())
 
-    apilogger.New(ctx, "") // actually initializes global logger
+    apilogger.New(ctx) // actually initializes global logger
 
     apilogger.Info(ctx, apilogger.LogCatDebug, "This is an info message")
     apilogger.Warn(ctx, apilogger.LogCatDebug, "This is a warning message")
