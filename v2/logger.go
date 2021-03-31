@@ -46,10 +46,11 @@ type Logger struct {
 	errorLog   *log.Logger
 	output     io.Writer
 	errOutput  io.Writer
-	requestID  string
-	apiKey     string
-	remoteAddr string
-	session    string
+
+	// requestID  string
+	// apiKey     string
+	// remoteAddr string
+	// session    string
 }
 
 type Fields map[string]interface{}
@@ -57,26 +58,11 @@ type Fields map[string]interface{}
 var defaultLogger *Logger
 
 // New returns a new Logger instance.
-func New(ctx context.Context) *Logger {
-	var output io.Writer = os.Stdout
-	var errOutput io.Writer = os.Stderr
-
-	var id, apiKey, addr, session string
-
-	id, _ = ctx.Value(RequestIDKey).(string)
-	apiKey, _ = ctx.Value(APIKEY).(string)
-	addr, _ = ctx.Value(RemoteAddrKey).(string)
-	session, _ = ctx.Value(SessionIDKey).(string)
-
+func New() *Logger {
 	defaultLogger = &Logger{
-		requestID:  id,
-		apiKey:     apiKey,
-		remoteAddr: formatIPAddr(addr),
-		session:    session,
-		output:     output,
-		errOutput:  errOutput,
+		output:    os.Stdout,
+		errOutput: os.Stderr,
 	}
-
 	return defaultLogger
 }
 
@@ -96,16 +82,16 @@ func (l *Logger) SetOutputFile(outPath string) error {
 }
 
 // prints message.
-func (l *Logger) printlnWF(logger *log.Logger, logCat LogCat, startTime time.Time, fields *Fields) {
-	logger.Println(finalMessageWF(l, logCat, startTime, fields))
+func (l *Logger) printlnWF(logger *log.Logger, logCat LogCat, startTime time.Time, requestID, apiKey, remoteAddr, session string, fields *Fields) {
+	logger.Println(finalMessageWF(logCat, startTime, requestID, apiKey, remoteAddr, session, fields))
 }
 
-func (l *Logger) println(logger *log.Logger, logCat LogCat, startTime time.Time, v ...interface{}) {
-	logger.Println(finalMessage(l, logCat, startTime, v...))
+func (l *Logger) println(logger *log.Logger, logCat LogCat, startTime time.Time, requestID, apiKey, remoteAddr, session string, v ...interface{}) {
+	logger.Println(finalMessage(logCat, startTime, requestID, apiKey, remoteAddr, session, v...))
 }
 
-func (l *Logger) printlnf(logger *log.Logger, logCat LogCat, startTime time.Time, format string, v ...interface{}) {
-	logger.Println(finalMessagef(l, logCat, startTime, format, v...))
+func (l *Logger) printlnf(logger *log.Logger, logCat LogCat, startTime time.Time, requestID, apiKey, remoteAddr, session string, format string, v ...interface{}) {
+	logger.Println(finalMessagef(logCat, startTime, requestID, apiKey, remoteAddr, session, format, v...))
 }
 
 func (l *Logger) Info(ctx context.Context, logCat LogCat, v ...interface{}) {
@@ -113,10 +99,14 @@ func (l *Logger) Info(ctx context.Context, logCat LogCat, v ...interface{}) {
 		l.infoLog = log.New(l.output, prefixInfo, log.Ldate|log.Ltime)
 	}
 
-	// Get start time from context
+	// Extract contextual values
+	requestID, _ := ctx.Value(RequestIDKey).(string)
+	apiKey, _ := ctx.Value(APIKEY).(string)
+	remoteAddr, _ := ctx.Value(RemoteAddrKey).(string)
+	sessionID, _ := ctx.Value(SessionIDKey).(string)
 	startTime, _ := ctx.Value(StartTime).(time.Time)
 
-	l.println(l.infoLog, logCat, startTime, v...)
+	l.println(l.infoLog, logCat, startTime, requestID, apiKey, remoteAddr, sessionID, v...)
 }
 
 func (l *Logger) Infof(ctx context.Context, logCat LogCat, format string, v ...interface{}) {
@@ -124,10 +114,14 @@ func (l *Logger) Infof(ctx context.Context, logCat LogCat, format string, v ...i
 		l.infoLog = log.New(l.output, prefixInfo, log.Ldate|log.Ltime)
 	}
 
-	// Get start time from context
+	// Extract contextual values
+	requestID, _ := ctx.Value(RequestIDKey).(string)
+	apiKey, _ := ctx.Value(APIKEY).(string)
+	remoteAddr, _ := ctx.Value(RemoteAddrKey).(string)
+	sessionID, _ := ctx.Value(SessionIDKey).(string)
 	startTime, _ := ctx.Value(StartTime).(time.Time)
 
-	l.printlnf(l.infoLog, logCat, startTime, format, v...)
+	l.printlnf(l.infoLog, logCat, startTime, requestID, apiKey, remoteAddr, sessionID, format, v...)
 }
 
 func (l *Logger) InfoWF(ctx context.Context, logCat LogCat, fields *Fields) {
@@ -135,10 +129,14 @@ func (l *Logger) InfoWF(ctx context.Context, logCat LogCat, fields *Fields) {
 		l.infoLog = log.New(l.output, prefixInfo, log.Ldate|log.Ltime)
 	}
 
-	// Get start time from context
+	// Extract contextual values
+	requestID, _ := ctx.Value(RequestIDKey).(string)
+	apiKey, _ := ctx.Value(APIKEY).(string)
+	remoteAddr, _ := ctx.Value(RemoteAddrKey).(string)
+	sessionID, _ := ctx.Value(SessionIDKey).(string)
 	startTime, _ := ctx.Value(StartTime).(time.Time)
 
-	l.printlnWF(l.infoLog, logCat, startTime, fields)
+	l.printlnWF(l.infoLog, logCat, startTime, requestID, apiKey, remoteAddr, sessionID, fields)
 }
 
 func (l *Logger) Printf(s string, i ...interface{}) {
@@ -150,10 +148,14 @@ func (l *Logger) Warn(ctx context.Context, logCat LogCat, v ...interface{}) {
 		l.warningLog = log.New(l.output, prefixWarn, log.Ldate|log.Ltime)
 	}
 
-	// Get start time from context
+	// Extract contextual values
+	requestID, _ := ctx.Value(RequestIDKey).(string)
+	apiKey, _ := ctx.Value(APIKEY).(string)
+	remoteAddr, _ := ctx.Value(RemoteAddrKey).(string)
+	sessionID, _ := ctx.Value(SessionIDKey).(string)
 	startTime, _ := ctx.Value(StartTime).(time.Time)
 
-	l.println(l.warningLog, logCat, startTime, v...)
+	l.println(l.warningLog, logCat, startTime, requestID, apiKey, remoteAddr, sessionID, v...)
 }
 
 func (l *Logger) Warnf(ctx context.Context, logCat LogCat, format string, v ...interface{}) {
@@ -161,10 +163,14 @@ func (l *Logger) Warnf(ctx context.Context, logCat LogCat, format string, v ...i
 		l.warningLog = log.New(l.output, prefixWarn, log.Ldate|log.Ltime)
 	}
 
-	// Get start time from context
+	// Extract contextual values
+	requestID, _ := ctx.Value(RequestIDKey).(string)
+	apiKey, _ := ctx.Value(APIKEY).(string)
+	remoteAddr, _ := ctx.Value(RemoteAddrKey).(string)
+	sessionID, _ := ctx.Value(SessionIDKey).(string)
 	startTime, _ := ctx.Value(StartTime).(time.Time)
 
-	l.printlnf(l.warningLog, logCat, startTime, format, v...)
+	l.printlnf(l.warningLog, logCat, startTime, requestID, apiKey, remoteAddr, sessionID, format, v...)
 }
 
 func (l *Logger) WarnWF(ctx context.Context, logCat LogCat, fields *Fields) {
@@ -172,10 +178,14 @@ func (l *Logger) WarnWF(ctx context.Context, logCat LogCat, fields *Fields) {
 		l.warningLog = log.New(l.output, prefixWarn, log.Ldate|log.Ltime)
 	}
 
-	// Get start time from context
+	// Extract contextual values
+	requestID, _ := ctx.Value(RequestIDKey).(string)
+	apiKey, _ := ctx.Value(APIKEY).(string)
+	remoteAddr, _ := ctx.Value(RemoteAddrKey).(string)
+	sessionID, _ := ctx.Value(SessionIDKey).(string)
 	startTime, _ := ctx.Value(StartTime).(time.Time)
 
-	l.printlnWF(l.warningLog, logCat, startTime, fields)
+	l.printlnWF(l.warningLog, logCat, startTime, requestID, apiKey, remoteAddr, sessionID, fields)
 }
 
 func (l *Logger) Error(ctx context.Context, logCat LogCat, v ...interface{}) {
@@ -183,10 +193,14 @@ func (l *Logger) Error(ctx context.Context, logCat LogCat, v ...interface{}) {
 		l.errorLog = log.New(l.errOutput, prefixError, log.Ldate|log.Ltime)
 	}
 
-	// Get start time from context
+	// Extract contextual values
+	requestID, _ := ctx.Value(RequestIDKey).(string)
+	apiKey, _ := ctx.Value(APIKEY).(string)
+	remoteAddr, _ := ctx.Value(RemoteAddrKey).(string)
+	sessionID, _ := ctx.Value(SessionIDKey).(string)
 	startTime, _ := ctx.Value(StartTime).(time.Time)
 
-	l.println(l.errorLog, logCat, startTime, v...)
+	l.println(l.errorLog, logCat, startTime, requestID, apiKey, remoteAddr, sessionID, v...)
 }
 
 func (l *Logger) Errorf(ctx context.Context, logCat LogCat, format string, v ...interface{}) {
@@ -194,10 +208,14 @@ func (l *Logger) Errorf(ctx context.Context, logCat LogCat, format string, v ...
 		l.errorLog = log.New(l.errOutput, prefixError, log.Ldate|log.Ltime)
 	}
 
-	// Get start time from context
+	// Extract contextual values
+	requestID, _ := ctx.Value(RequestIDKey).(string)
+	apiKey, _ := ctx.Value(APIKEY).(string)
+	remoteAddr, _ := ctx.Value(RemoteAddrKey).(string)
+	sessionID, _ := ctx.Value(SessionIDKey).(string)
 	startTime, _ := ctx.Value(StartTime).(time.Time)
 
-	l.printlnf(l.errorLog, logCat, startTime, format, v...)
+	l.printlnf(l.errorLog, logCat, startTime, requestID, apiKey, remoteAddr, sessionID, format, v...)
 }
 
 func (l *Logger) ErrorWF(ctx context.Context, logCat LogCat, fields *Fields) {
@@ -205,10 +223,14 @@ func (l *Logger) ErrorWF(ctx context.Context, logCat LogCat, fields *Fields) {
 		l.errorLog = log.New(l.errOutput, prefixError, log.Ldate|log.Ltime)
 	}
 
-	// Get start time from context
+	// Extract contextual values
+	requestID, _ := ctx.Value(RequestIDKey).(string)
+	apiKey, _ := ctx.Value(APIKEY).(string)
+	remoteAddr, _ := ctx.Value(RemoteAddrKey).(string)
+	sessionID, _ := ctx.Value(SessionIDKey).(string)
 	startTime, _ := ctx.Value(StartTime).(time.Time)
 
-	l.printlnWF(l.errorLog, logCat, startTime, fields)
+	l.printlnWF(l.errorLog, logCat, startTime, requestID, apiKey, remoteAddr, sessionID, fields)
 }
 
 func (l *Logger) Fatal(ctx context.Context, logCat LogCat, v ...interface{}) {
@@ -216,11 +238,15 @@ func (l *Logger) Fatal(ctx context.Context, logCat LogCat, v ...interface{}) {
 		l.errorLog = log.New(l.errOutput, "", log.Ldate|log.Ltime)
 	}
 
-	// Get start time from context
+	// Extract contextual values
+	requestID, _ := ctx.Value(RequestIDKey).(string)
+	apiKey, _ := ctx.Value(APIKEY).(string)
+	remoteAddr, _ := ctx.Value(RemoteAddrKey).(string)
+	sessionID, _ := ctx.Value(SessionIDKey).(string)
 	startTime, _ := ctx.Value(StartTime).(time.Time)
 
 	l.errorLog.SetPrefix(prefixFatal)
-	l.errorLog.Fatal(finalMessage(l, logCat, startTime, v...))
+	l.errorLog.Fatal(finalMessage(logCat, startTime, requestID, apiKey, remoteAddr, sessionID, v...))
 }
 
 func (l *Logger) Fatalf(ctx context.Context, logCat LogCat, format string, v ...interface{}) {
@@ -228,11 +254,15 @@ func (l *Logger) Fatalf(ctx context.Context, logCat LogCat, format string, v ...
 		l.errorLog = log.New(l.errOutput, "", log.Ldate|log.Ltime)
 	}
 
-	// Get start time from context
+	// Extract contextual values
+	requestID, _ := ctx.Value(RequestIDKey).(string)
+	apiKey, _ := ctx.Value(APIKEY).(string)
+	remoteAddr, _ := ctx.Value(RemoteAddrKey).(string)
+	sessionID, _ := ctx.Value(SessionIDKey).(string)
 	startTime, _ := ctx.Value(StartTime).(time.Time)
 
 	l.errorLog.SetPrefix(prefixFatal)
-	l.errorLog.Fatal(finalMessagef(l, logCat, startTime, format, v...))
+	l.errorLog.Fatal(finalMessagef(logCat, startTime, requestID, apiKey, remoteAddr, sessionID, format, v...))
 }
 
 func (l *Logger) FatalWF(ctx context.Context, logCat LogCat, fields *Fields) {
@@ -240,11 +270,15 @@ func (l *Logger) FatalWF(ctx context.Context, logCat LogCat, fields *Fields) {
 		l.errorLog = log.New(l.errOutput, "", log.Ldate|log.Ltime)
 	}
 
-	// Get start time from context
+	// Extract contextual values
+	requestID, _ := ctx.Value(RequestIDKey).(string)
+	apiKey, _ := ctx.Value(APIKEY).(string)
+	remoteAddr, _ := ctx.Value(RemoteAddrKey).(string)
+	sessionID, _ := ctx.Value(SessionIDKey).(string)
 	startTime, _ := ctx.Value(StartTime).(time.Time)
 
 	l.errorLog.SetPrefix(prefixFatal)
-	l.errorLog.Fatal(finalMessageWF(l, logCat, startTime, fields))
+	l.errorLog.Fatal(finalMessageWF(logCat, startTime, requestID, apiKey, remoteAddr, sessionID, fields))
 }
 
 // Info prints message with logging level of info

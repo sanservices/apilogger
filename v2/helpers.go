@@ -47,7 +47,7 @@ func formatIPAddr(addr string) string {
 }
 
 // builds standard information.
-func baseMessage(l *Logger, logCat LogCat, startTime time.Time) string {
+func baseMessage(logCat LogCat, startTime time.Time, requestID, apiKey, remoteAddr, session string) string {
 	var elapsed time.Duration
 	// If time is nonzero
 	if !startTime.IsZero() {
@@ -58,19 +58,20 @@ func baseMessage(l *Logger, logCat LogCat, startTime time.Time) string {
 	return fmt.Sprintf(
 		`location="%s", requestId="%s", clientIp="%s", apiKey="%s", sessionId="%s", ms="%f", function="%s", code="%s", type="%s"`,
 		location(),
-		l.requestID,
-		l.remoteAddr,
-		l.apiKey,
-		l.session,
+		requestID,
+		remoteAddr,
+		apiKey,
+		session,
 		msElapsed,
 		funcName(),
 		logCat.Code,
-		logCat.Type)
+		logCat.Type,
+	)
 }
 
 // formats and finalizes the log content
-func finalMessageWF(l *Logger, logCat LogCat, startTime time.Time, fields *Fields) string {
-	base := baseMessage(l, logCat, startTime)
+func finalMessageWF(logCat LogCat, startTime time.Time, requestID, apiKey, remoteAddr, session string, fields *Fields) string {
+	base := baseMessage(logCat, startTime, requestID, apiKey, remoteAddr, session)
 	msg := ""
 
 	for k, v := range *fields {
@@ -83,8 +84,8 @@ func finalMessageWF(l *Logger, logCat LogCat, startTime time.Time, fields *Field
 }
 
 // formats and finalizes the log content
-func finalMessage(l *Logger, logCat LogCat, startTime time.Time, v ...interface{}) string {
-	base := baseMessage(l, logCat, startTime)
+func finalMessage(logCat LogCat, startTime time.Time, requestID, apiKey, remoteAddr, session string, v ...interface{}) string {
+	base := baseMessage(logCat, startTime, requestID, apiKey, remoteAddr, session)
 	msg := fmt.Sprint(v...)
 	wrappedMsg := fmt.Sprintf(`message="%s"`, msg)
 
@@ -92,8 +93,8 @@ func finalMessage(l *Logger, logCat LogCat, startTime time.Time, v ...interface{
 }
 
 // formats and finalizes the log content
-func finalMessagef(l *Logger, logCat LogCat, startTime time.Time, format string, v ...interface{}) string {
-	base := baseMessage(l, logCat, startTime)
+func finalMessagef(logCat LogCat, startTime time.Time, requestID, apiKey, remoteAddr, session, format string, v ...interface{}) string {
+	base := baseMessage(logCat, startTime, requestID, apiKey, remoteAddr, session)
 	msg := fmt.Sprintf(format, v...)
 	wrappedMsg := fmt.Sprintf(`message="%s"`, msg)
 
