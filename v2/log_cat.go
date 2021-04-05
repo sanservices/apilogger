@@ -194,4 +194,5 @@ var allLogCats = []LogCat{
 	LogCatKafkaProcessMessage,
 	LogCatKafkaCommitOffset,
 	LogCatExternal,
-	LogCatUncategorized}
+	LogCatUncategorized,
+}
