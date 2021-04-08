@@ -1,44 +1,29 @@
 package apilogger
 
 import (
-	"context"
-	"net/http"
+	"os"
 	"strings"
 	"testing"
 	"time"
+
+	assertion "github.com/stretchr/testify/assert"
 )
 
 func TestNew(t *testing.T) {
-	apiKey := "r12d3f4"
-	requestID := "1234"
-	ip := "127.0.0.1"
-	session := "b011157f-a97b-4090-8d56-6d4bafb4f60c"
-	path := "/test"
+	logger := New()
 
-	rq, err := http.NewRequest("GET", path, nil)
-	if err != nil {
-		t.Error(err)
-	}
+	assert := assertion.New(t)
 
-	rq = rq.WithContext(context.WithValue(
-		rq.Context(), APIKEY, apiKey))
-	rq = rq.WithContext(context.WithValue(
-		rq.Context(), RequestIDKey, requestID))
-	rq = rq.WithContext(context.WithValue(
-		rq.Context(), RemoteAddrKey, ip))
-	rq = rq.WithContext(context.WithValue(
-		rq.Context(), SessionIDKey, session))
-
-	logger := New(rq.Context())
-
-	assertEquals(t, logger.apiKey, apiKey)
-	assertEquals(t, logger.remoteAddr, ip)
-	assertEquals(t, logger.requestID, requestID)
-	assertEquals(t, logger.session, session)
+	assert.Equal(
+		&Logger{
+			output:    os.Stdout,
+			errOutput: os.Stderr,
+		}, logger,
+	)
 }
 
 func TestFuncName(t *testing.T) {
-	expected := "apilogger.TestFuncName"
+	expected := "v2.TestFuncName"
 
 	// mimics call stack depth
 	func1 := func() string { return funcName() }
@@ -48,27 +33,21 @@ func TestFuncName(t *testing.T) {
 
 	output := func4()
 
-	assertEquals(t, output, expected)
+	assertion.New(t).Equal(output, expected)
 }
 
 func TestFormatIPAddr(t *testing.T) {
 	expected := "127.0.0.1"
 	output := formatIPAddr("127.0.0.1")
 
-	assertEquals(t, output, expected)
+	assertion.New(t).Equal(output, expected)
 }
 
 func TestBaseMessage(t *testing.T) {
-	rq, err := http.NewRequest("GET", "/test", nil)
-	if err != nil {
-		t.Error(err)
-	}
-
-	logger := New(rq.Context())
-	logCat := LogCatStartUp
-
 	// mimics call stack depth
-	func1 := func() string { return baseMessage(logger, logCat, time.Now()) }
+	func1 := func() string {
+		return baseMessage(LogCatDebug, time.Now(), "requestID1", "apiKey1", "remoteAddr1", "sessionID1")
+	}
 	func2 := func() string { return func1() }
 	func3 := func() string { return func2() }
 	func4 := func() string { return func3() }
@@ -81,61 +60,31 @@ func TestBaseMessage(t *testing.T) {
 }
 
 func TestFinalMessage(t *testing.T) {
-	rq, err := http.NewRequest("GET", "/test", nil)
-	if err != nil {
-		t.Error(err)
-	}
-
-	logger := New(rq.Context())
 	logCat := LogCatStartUp
-	output := finalMessage(logger, logCat, time.Now(), "hello test")
+	output := finalMessage(logCat, time.Now(), "requestID1", "apiKey1", "remoteAddr1", "sessionID1", "hello test")
+	assert := assertion.New(t)
 
-	assertStrContains(t, output, "hello test")
-	assertStrContains(t, output, " code=\""+logCat.Code+"\"")
-	assertStrContains(t, output, " type=\""+logCat.Type+"\"")
+	assert.Contains(output, "hello test")
+	assert.Contains(output, " code=\""+logCat.Code+"\"")
+	assert.Contains(output, " type=\""+logCat.Type+"\"")
 }
 
 func TestFinalMessagef(t *testing.T) {
-	rq, err := http.NewRequest("GET", "/test", nil)
-	if err != nil {
-		t.Error(err)
-	}
-
-	logger := New(rq.Context())
 	logCat := LogCatStartUp
-	output := finalMessagef(logger, logCat, time.Now(), "%s", "hello test")
+	output := finalMessagef(logCat, time.Now(), "requestID1", "apiKey1", "remoteAddr1", "sessionID1", "%s", "hello test")
+	assert := assertion.New(t)
 
-	assertStrContains(t, output, " message=\"hello test\"")
-	assertStrContains(t, output, " code=\""+logCat.Code+"\"")
-	assertStrContains(t, output, " type=\""+logCat.Type+"\"")
+	assert.Contains(output, " message=\"hello test\"")
+	assert.Contains(output, " code=\""+logCat.Code+"\"")
+	assert.Contains(output, " type=\""+logCat.Type+"\"")
 }
 
 func TestFinalMessageWF(t *testing.T) {
-	rq, err := http.NewRequest("GET", "/test", nil)
-	if err != nil {
-		t.Error(err)
-	}
-
-	logger := New(rq.Context())
 	logCat := LogCatStartUp
-	output := finalMessageWF(logger, logCat, time.Now(), &Fields{"message": "hello test"})
+	output := finalMessageWF(logCat, time.Now(), "requestID1", "apiKey1", "remoteAddr1", "sessionID1", &Fields{"message": "hello test"})
+	assert := assertion.New(t)
 
-	assertStrContains(t, output, " message=\"hello test\"")
-	assertStrContains(t, output, " code=\""+logCat.Code+"\"")
-	assertStrContains(t, output, " type=\""+logCat.Type+"\"")
-}
-
-func assertEquals(
-	t *testing.T, output interface{}, expected interface{}) {
-
-	if output != expected {
-		t.Errorf("Output [%v] not equal to expected [%v]",
-			output, expected)
-	}
-}
-
-func assertStrContains(t *testing.T, output string, expected string) {
-	if !strings.Contains(output, expected) {
-		t.Errorf("Output insufficient - [%s]", output)
-	}
+	assert.Contains(output, " message=\"hello test\"")
+	assert.Contains(output, " code=\""+logCat.Code+"\"")
+	assert.Contains(output, " type=\""+logCat.Type+"\"")
 }
