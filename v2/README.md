@@ -4,7 +4,7 @@ Simple api logger for golang with the purpose of log basic information like api-
 
 # Installation
 
-Run `go get github.com/san-services/apilogger/v2`
+Run `go get github.com/sanservices/apilogger/v2`
 
 # Changes
 
