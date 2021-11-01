@@ -30,8 +30,8 @@ const (
 	StartTime string = "start-time"
 
 	// Depth of the callstack - needed to determine
-	// the initial caller function, for example
-	depth int = 5
+	// the initial caller function
+	depth int = 6
 
 	prefixInfo  = "INFO "
 	prefixWarn  = "WARN "
