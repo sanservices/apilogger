@@ -44,8 +44,9 @@ func TestFuncName(t *testing.T) {
 	func2 := func() string { return func1() }
 	func3 := func() string { return func2() }
 	func4 := func() string { return func3() }
+	func5 := func() string { return func4() }
 
-	output := func4()
+	output := func5()
 
 	assertEquals(t, output, expected)
 }
