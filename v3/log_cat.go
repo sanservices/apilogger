@@ -11,8 +11,16 @@ type LogCat struct {
 // All log categories. Any additions or removals to
 // be registered in the `allLogCats` slice below.
 var (
-	// LogCatRunningTask usage: Schehuled taks is running
-	LogCatRunningTask = LogCat{Code: "CJ001", Type: "running-task"}
+	// LogCatRunningTask usage: Scheduled taks is running
+	LogCatRunningTask = LogCat{Code: "CJ001", Type: "running_task"}
+
+	//LogCatHandlerFunction usage : Functions called in the handler
+	//of a scheduled task
+	LogCatHandlerFunction = LogCat{Code: "CJ002", Type: "handler_function"}
+
+	//LogCatTaskSetup usage : Setup of database, configuration, repository
+	// and other utilities in scheduled task
+	LogCatTaskSetup = LogCat{Code: "CJ003", Type: "task_setup"}
 
 	// LogCatStartUp usage: service startup logs
 	LogCatStartUp = LogCat{Code: "STT001", Type: "service_startup"}
@@ -158,6 +166,8 @@ var (
 // Any new LogCats should be registered here.
 var allLogCats = []LogCat{
 	LogCatRunningTask,
+	LogCatHandlerFunction,
+	LogCatTaskSetup,
 	LogCatStartUp,
 	LogCatHealth,
 	LogCatRouterInit,
