@@ -121,6 +121,9 @@ func (l *Logger) InfoWF(ctx context.Context, logCat LogCat, status StatusCat, fi
 	}
 
 	// Extract contextual values
+	log.Printf("CONTEXT %+v", ContextData)
+	log.Printf("CONTEXT %+v", ctx.Value("context-data"))
+	log.Printf("CONTEXT %+v", ctx.Value(ContextData))
 	contextData, err := ctx.Value(ContextData).(CtxKeys)
 	fmt.Print(err)
 
