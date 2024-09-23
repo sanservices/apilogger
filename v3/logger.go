@@ -2,6 +2,7 @@ package apilogger
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -122,6 +123,7 @@ func (l *Logger) InfoWF(ctx context.Context, logCat LogCat, status StatusCat, fi
 
 	// Extract contextual values
 	contextData, _ := ctx.Value(ContextData).(CtxKeys)
+
 	l.printlnWF(l.infoLog, logCat, contextData.StartTime, contextData.TaskName, contextData.UUID, status, fields)
 }
 
