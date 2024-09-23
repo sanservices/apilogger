@@ -2,7 +2,6 @@ package apilogger
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"os"
