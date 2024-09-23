@@ -10,7 +10,7 @@ import (
 )
 
 type CtxKeys struct {
-	// TaskName is the name of the schehuled task
+	// TaskName is the name of the scheduled task
 	// where the log originated from
 	TaskName string
 
@@ -22,11 +22,12 @@ type CtxKeys struct {
 	// access start time of transaction
 	StartTime time.Time
 }
+type ContextKey string
 
 const (
 	//ContextData is the struct that contains
 	//the data from the context
-	ContextData string = "context-data"
+	ContextData ContextKey = "context-data"
 
 	// Depth of the callstack - needed to determine
 	// the initial caller function
@@ -121,11 +122,7 @@ func (l *Logger) InfoWF(ctx context.Context, logCat LogCat, status StatusCat, fi
 	}
 
 	// Extract contextual values
-	log.Printf("CONTEXT %+v", ContextData)
-	log.Printf("CONTEXT %+v", ctx.Value("context-data"))
-	log.Printf("CONTEXT %+v", ctx.Value(ContextData))
-	contextData, err := ctx.Value(ContextData).(CtxKeys)
-	fmt.Print(err)
+	contextData, _ := ctx.Value(ContextData).(CtxKeys)
 
 	l.printlnWF(l.infoLog, logCat, contextData.StartTime, contextData.TaskName, contextData.UUID, status, fields)
 }

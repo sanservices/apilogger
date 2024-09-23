@@ -1,15 +1,14 @@
-# apilogger v2
+# apilogger v3
 
-Simple api logger for golang with the purpose of log basic information like api-key, clinet ip, request-id.
+Simple api logger for golang scheduled task with the purpose of log basic information like task name, uuid and start time.
 
 # Installation
 
-Run `go get github.com/sanservices/apilogger/v2`
+Run `go get github.com/sanservices/apilogger/v3`
 
 # Changes
 
-1. Added context as first argument to log functions. (thus we can pass some additional values to log, as now is implemented for execution time tracking)
-2. Made logger global
+1. Apilogger modified to log shceduled tasks information , warnings and errors.
 
 # Usage
 
@@ -20,32 +19,35 @@ import (
 	"context"
 	"errors"
 	"time"
-
-	"github.com/sanservices/apilogger/v2"
+	"github.com/sanservices/apilogger/v3"
 )
 
 func main() {
-	ctx := context.TODO()
+	ctx := context.Background()
 
-	ctx = context.WithValue(ctx, apilogger.APIKEY, "apikey1")
-	ctx = context.WithValue(ctx, apilogger.RequestIDKey, "requestIdKey1")
-	ctx = context.WithValue(ctx, apilogger.RemoteAddrKey, "remoteaddrKey1")
-	ctx = context.WithValue(ctx, apilogger.SessionIDKey, "sessionIdKey1")
-	ctx = context.WithValue(ctx, apilogger.StartTime, time.Now())
+	var keyCtx apilogger.ContextKey = "key-name"
+
+	contextData := apilogger.CtxKeys{
+		TaskName:  "task-name",
+		UUID:      "uuid",
+		StartTime: time.Now(),
+	}
+	
+	ctx = context.WithValue(ctx, keyCtx, contextData)
 
 	l := apilogger.New(ctx)
 
-	l.Info(ctx, apilogger.LogCatDebug, "This is an info message")
-	l.Warn(ctx, apilogger.LogCatDebug, "This is a warning message")
-	l.Error(ctx, apilogger.LogCatDebug, "This is an error message")
+  	l.Info(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, "This is an info message")
+	l.Warn(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, "This is a warning message")
+	l.Error(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, "This is an error message")
 
-	l.Infof(ctx, apilogger.LogCatDebug, "This is an info message with %s", "some variable")
-	l.Warnf(ctx, apilogger.LogCatDebug, "This is a warning message with format, some number: %d", 100)
-	l.Errorf(ctx, apilogger.LogCatDebug, "This is an error message with format, %v", errors.New("an error"))
+	l.Infof(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, "This is an info message with %s", "some variable")
+	l.Warnf(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, "This is a warning message with format, some number: %d", 100)
+	l.Errorf(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, "This is an error message with format, %v", errors.New("an error"))
 
-	l.InfoWF(ctx, apilogger.LogCatDebug, &apilogger.Fields{"message": "my message"})
-	l.WarnWF(ctx, apilogger.LogCatDebug, &apilogger.Fields{"warning": "my warning", "other": "another message"})
-	l.ErrorWF(ctx, apilogger.LogCatDebug, &apilogger.Fields{"error": errors.New("my error message")})
+	l.InfoWF(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, &apilogger.Fields{"message": "my message"})
+	l.WarnWF(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, &apilogger.Fields{"warning": "my warning", "other": "another message"})
+	l.ErrorWF(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, &apilogger.Fields{"error": errors.New("my error message")})
 
 }
 ```
@@ -53,15 +55,17 @@ func main() {
 output is
 
 ```shell
-INFO 2021/03/23 23:37:40 location="main.go:21", requestId="requestIdKey1", clientIp="", apiKey="apikey1", sessionId="sessionIdKey1", ms="0.062139", function="main.main", code="DBG001", type="debug", message="This is an info message"
-WARN 2021/03/23 23:37:40 location="main.go:22", requestId="requestIdKey1", clientIp="", apiKey="apikey1", sessionId="sessionIdKey1", ms="0.150727", function="main.main", code="DBG001", type="debug", message="This is a warning message"
-ERROR 2021/03/23 23:37:40 location="main.go:23", requestId="requestIdKey1", clientIp="", apiKey="apikey1", sessionId="sessionIdKey1", ms="0.174835", function="main.main", code="DBG001", type="debug", message="This is an error message"
-INFO 2021/03/23 23:37:40 location="main.go:25", requestId="requestIdKey1", clientIp="", apiKey="apikey1", sessionId="sessionIdKey1", ms="0.190661", function="main.main", code="DBG001", type="debug", message="This is an info message with some variable"
-WARN 2021/03/23 23:37:40 location="main.go:26", requestId="requestIdKey1", clientIp="", apiKey="apikey1", sessionId="sessionIdKey1", ms="0.204906", function="main.main", code="DBG001", type="debug", message="This is a warning message with format, some number: 100"
-ERROR 2021/03/23 23:37:40 location="main.go:27", requestId="requestIdKey1", clientIp="", apiKey="apikey1", sessionId="sessionIdKey1", ms="0.219298", function="main.main", code="DBG001", type="debug", message="This is an error message with format, An error"
-INFO 2021/03/23 23:37:40 location="main.go:29", requestId="requestIdKey1", clientIp="", apiKey="apikey1", sessionId="sessionIdKey1", ms="0.252828", function="main.main", code="DBG001", type="debug", message="my message"
-WARN 2021/03/23 23:37:40 location="main.go:30", requestId="requestIdKey1", clientIp="", apiKey="apikey1", sessionId="sessionIdKey1", ms="0.274832", function="main.main", code="DBG001", type="debug", other="another message", warning="my warning"
-ERROR 2021/03/23 23:37:40 location="main.go:31", requestId="requestIdKey1", clientIp="", apiKey="apikey1", sessionId="sessionIdKey1", ms="0.287675", function="main.main", code="DBG001", type="debug", error="my error message"
+INFO 2024/09/23 11:29:55 uuid="20d989f8", taskName="Task-Name", location="main.go:19", ms="1888.224446",  function="main.main", code="DBG001", type="debug", status="Debug", message="This is an info message"
+WARN 2024/09/23 11:29:55 uuid="20d989f8", taskName="Task-Name", location="main.go:19", ms="60615.903550",  function="main.main", code="DBG001", type="debug", status="Debug", message="This is a warning message"
+ERROR 2024/09/23 11:29:55 uuid="20d989f8", taskName="Task-Name", location="main.go:19", ms="1679.401089",  function="main.main", code="DBG001", type="debug", status="Debug", message="This is an error message"
+
+INFO 2024/09/23 11:29:55 uuid="20d989f8", taskName="Task-Name", location="main.go:19", ms="1237.328450",  function="main.main", code="DBG001", type="debug", status="Debug", message="This is an info message with some variable"
+WARN 2024/09/23 11:29:55 uuid="20d989f8", taskName="Task-Name", location="main.go:19", ms="18724.969123",  function="main.main", code="DBG001", type="debug", status="Debug", message="This is a warning message with format, some number: 100"
+ERROR 2024/09/23 11:29:55 uuid="20d989f8", taskName="Task-Name", location="main.go:19", ms="35366.390624",  function="main.main", code="DBG001", type="debug", status="Debug", message="This is an error message with format, an error"
+
+INFO 2024/09/23 11:29:55 uuid="20d989f8", taskName="Task-Name", location="main.go:19", ms="5253.215990",  function="main.main", code="DBG001", type="debug", status="Debug", message="my message"
+WARN 2024/09/23 11:29:55 uuid="20d989f8", taskName="Task-Name", location="main.go:19", ms="33911.525828",  function="main.main", code="DBG001", type="debug", status="Debug", warning="my warning", other="another message"
+ERROR 2024/09/23 11:29:55 uuid="20d989f8", taskName="Task-Name", location="main.go:19", ms="45049.412831",  function="main.main", code="DBG001", type="debug", status="Debug", error="my error message"
 ```
 
 or with global logger initialization
@@ -73,32 +77,36 @@ import (
 	"context"
 	"errors"
 	"time"
-
-	"github.com/sanservices/apilogger/v2"
+	"github.com/sanservices/apilogger/v3"
 )
 
 func main() {
-    ctx := context.TODO()
+	ctx := context.Background()
 
-    ctx = context.WithValue(ctx, apilogger.APIKEY, "apikey1")
-    ctx = context.WithValue(ctx, apilogger.RequestIDKey, "requestIdKey1")
-    ctx = context.WithValue(ctx, apilogger.RemoteAddrKey, "remoteaddrKey1")
-    ctx = context.WithValue(ctx, apilogger.SessionIDKey, "sessionIdKey1")
-    ctx = context.WithValue(ctx, apilogger.StartTime, time.Now())
+	var keyCtx apilogger.ContextKey = "key-name"
+	
+	contextData := apilogger.CtxKeys{
+		TaskName:  "task-name",
+		UUID:      "uuid",
+		StartTime: time.Now(),
+	}
+	
+	ctx = context.WithValue(ctx, keyCtx, contextData)
 
-    apilogger.New(ctx) // actually initializes global logger
+	apilogger.New(ctx)// actually initializes global logger
 
-    apilogger.Info(ctx, apilogger.LogCatDebug, "This is an info message")
-    apilogger.Warn(ctx, apilogger.LogCatDebug, "This is a warning message")
-    apilogger.Error(ctx, apilogger.LogCatDebug, "This is an error message")
+  	apilogger.Info(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, "This is an info message")
+	apilogger.Warn(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, "This is a warning message")
+	apilogger.Error(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, "This is an error message")
 
-    apilogger.Infof(ctx, apilogger.LogCatDebug, "This is an info message with %s", "some variable")
-    apilogger.Warnf(ctx, apilogger.LogCatDebug, "This is a warning message with format, some number: %d", 100)
-    apilogger.Errorf(ctx, apilogger.LogCatDebug, "This is an error message with format, %v", errors.New("an error"))
+	apilogger.Infof(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, "This is an info message with %s", "some variable")
+	apilogger.Warnf(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, "This is a warning message with format, some number: %d", 100)
+	apilogger.Errorf(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, "This is an error message with format, %v", errors.New("an error"))
 
-    apilogger.InfoWF(ctx, apilogger.LogCatDebug, &apilogger.Fields{"message": "my message"})
-    apilogger.WarnWF(ctx, apilogger.LogCatDebug, &apilogger.Fields{"warning": "my warning", "other": "another message"})
-    apilogger.ErrorWF(ctx, apilogger.LogCatDebug, &apilogger.Fields{"error": errors.New("my error message")})
+	apilogger.InfoWF(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, &apilogger.Fields{"message": "my message"})
+	apilogger.WarnWF(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, &apilogger.Fields{"warning": "my warning", "other": "another message"})
+	apilogger.ErrorWF(ctx, apilogger.LogCatDebug, apilogger.StatusCatDebug, &apilogger.Fields{"error": errors.New("my error message")})
+
 }
 ```
 

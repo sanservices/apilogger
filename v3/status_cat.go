@@ -8,4 +8,5 @@ var (
 	StatusCatPassed  = StatusCat{Type: "Passed"}
 	StatusCatPending = StatusCat{Type: "Pending"}
 	StatusCatFailed  = StatusCat{Type: "Failed"}
+	StatusCatDebug   = StatusCat{Type: "Debug"}
 )
