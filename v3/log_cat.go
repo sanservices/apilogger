@@ -14,13 +14,24 @@ var (
 	// LogCatRunningTask usage: Scheduled taks is running
 	LogCatRunningTask = LogCat{Code: "CJ001", Type: "running_task"}
 
-	//LogCatHandlerFunction usage : Functions called in the handler
-	//of a scheduled task
-	LogCatHandlerFunction = LogCat{Code: "CJ002", Type: "handler_function"}
-
 	//LogCatTaskSetup usage : Setup of database, configuration, repository
 	// and other utilities in scheduled task
-	LogCatTaskSetup = LogCat{Code: "CJ003", Type: "task_setup"}
+	LogCatTaskSetup = LogCat{Code: "CJ002", Type: "task_setup"}
+
+	//LogCatCSV usage : CSV write, read and compression actions
+	LogCatCSV = LogCat{Code: "CJ003", Type: "csv"}
+
+	//LogCatXML usage : XML write, read and compression actions
+	LogCatXML = LogCat{Code: "CJ004", Type: "xml"}
+
+	//LogCatAcoustic usage : Acoustic API calls
+	LogCatAcoustic = LogCat{Code: "CJ005", Type: "acoustic"}
+
+	//LogCatSMTP usage : Email operations, send, validate, etc.
+	LogCatSMTP = LogCat{Code: "CJ006", Type: "smtp"}
+
+	//LogCatRecordProcessing: Loop through records to process them
+	LogCatRecordProcessing = LogCat{Code: "CJ007", Type: "processing-records"}
 
 	// LogCatStartUp usage: service startup logs
 	LogCatStartUp = LogCat{Code: "STT001", Type: "service_startup"}
@@ -166,7 +177,11 @@ var (
 // Any new LogCats should be registered here.
 var allLogCats = []LogCat{
 	LogCatRunningTask,
-	LogCatHandlerFunction,
+	LogCatCSV,
+	LogCatXML,
+	LogCatAcoustic,
+	LogCatSMTP,
+	LogCatRecordProcessing,
 	LogCatTaskSetup,
 	LogCatStartUp,
 	LogCatHealth,
