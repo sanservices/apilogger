@@ -1,6 +1,7 @@
 package apilogger
 
 import (
+	"context"
 	"os"
 	"strings"
 	"testing"
@@ -20,6 +21,14 @@ func TestNew(t *testing.T) {
 			errOutput: os.Stderr,
 		}, logger,
 	)
+}
+
+func TestGenerateConfig(t *testing.T) {
+
+	logger := New()
+	ctx := NewContextLogger(context.Background(), "test-generated-context")
+	logger.InfoWF(ctx, LogCatDebug, StatusCatPassed, &Fields{"message": "Configuration Test Generated Context", "step": "000"})
+
 }
 
 func TestFuncName(t *testing.T) {
